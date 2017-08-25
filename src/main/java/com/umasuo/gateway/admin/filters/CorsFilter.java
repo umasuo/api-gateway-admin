@@ -28,12 +28,6 @@ import javax.servlet.http.HttpServletResponse;
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class CorsFilter implements Filter {
 
-  /**
-   * Logger.
-   */
-  private static final Logger LOG = LoggerFactory.getLogger(CorsFilter.class);
-
-
   @Override
   public void init(FilterConfig fc) throws ServletException {
   }
