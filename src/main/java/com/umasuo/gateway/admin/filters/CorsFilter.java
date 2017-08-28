@@ -1,56 +1,76 @@
 package com.umasuo.gateway.admin.filters;
 
+import com.netflix.zuul.ZuulFilter;
+import com.netflix.zuul.context.RequestContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.Ordered;
-import org.springframework.core.annotation.Order;
-import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
-import org.springframework.web.filter.OncePerRequestFilter;
 
-import java.io.IOException;
-import java.util.Arrays;
-
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+
+import static com.netflix.zuul.context.RequestContext.getCurrentContext;
 
 /**
- * Created by Davis on 17/8/25.
+ * CORS filter.
  */
 @Component
-@Order(Ordered.HIGHEST_PRECEDENCE)
-public class CorsFilter implements Filter {
+public class CorsFilter extends ZuulFilter {
 
+  /**
+   * Logger.
+   */
+  private static final Logger LOGGER = LoggerFactory.getLogger(CorsFilter.class);
+
+  /**
+   * Filter type.
+   *
+   * @return
+   */
   @Override
-  public void init(FilterConfig fc) throws ServletException {
+  public String filterType() {
+    // use "pre", so we can check the auth before router to back end services.
+    return "pre";
   }
 
+  /**
+   * Filter order.
+   *
+   * @return int
+   */
   @Override
-  public void doFilter(ServletRequest req, ServletResponse resp, FilterChain chain)
-      throws IOException, ServletException {
-    HttpServletResponse response = (HttpServletResponse) resp;
-    HttpServletRequest request = (HttpServletRequest) req;
-    response.setHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS, DELETE");
-    response.setHeader("Access-Control-Max-Age", "3600");
-    response.setHeader("Access-Control-Allow-Headers",
-        "x-requested-with, authorization, Content-Type, Authorization, credential, X-XSRF-TOKEN");
+  public int filterOrder() {
+    return 6;
+  }
 
-    if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
-      response.setHeader("Access-Control-Allow-Origin", request.getHeader("Origin"));
-      response.setStatus(HttpServletResponse.SC_OK);
-    } else {
-      chain.doFilter(req, resp);
+  /**
+   * Check if we need to run this filter for this request.
+   *
+   * @return boolean
+   */
+  @Override
+  public boolean shouldFilter() {
+    RequestContext ctx = getCurrentContext();
+    String host = ctx.getRouteHost().getHost();
+    HttpServletRequest request = ctx.getRequest();
+    String method = request.getMethod();
+    String path = request.getRequestURI();
+    LOGGER.debug("Check for host: {}, path: {}, method: {}.", host, path, method);
+    boolean shouldFilter = true;
+    if ("OPTIONS".equals(method)) {
+      LOGGER.debug("Ignore host: {}, Path: {}, action: {}.", host, path, method);
+      shouldFilter = false;
     }
+    return shouldFilter;
   }
 
+
+  /**
+   * Run function.
+   *
+   * @return always return null
+   */
   @Override
-  public void destroy() {
+  public Object run() {
+    return null;
   }
 }
