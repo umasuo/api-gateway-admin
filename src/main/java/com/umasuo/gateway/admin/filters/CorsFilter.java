@@ -1,7 +1,5 @@
 package com.umasuo.gateway.admin.filters;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
@@ -25,15 +23,25 @@ import javax.servlet.http.HttpServletResponse;
 public class CorsFilter implements Filter {
 
   /**
-   * Logger.
+   * Init filter.
+   *
+   * @param fc filter config
+   * @throws ServletException exception
    */
-  private static final Logger LOG = LoggerFactory.getLogger(CorsFilter.class);
-
-
   @Override
   public void init(FilterConfig fc) throws ServletException {
+    // TODO: 17/8/29  
   }
 
+  /**
+   * Do filter.
+   *
+   * @param req request
+   * @param resp response
+   * @param chain filter chain
+   * @throws IOException exception
+   * @throws ServletException exception
+   */
   @Override
   public void doFilter(ServletRequest req, ServletResponse resp, FilterChain chain)
       throws IOException, ServletException {
@@ -45,14 +53,18 @@ public class CorsFilter implements Filter {
         "x-requested-with, authorization, Content-Type, Authorization, credential, X-XSRF-TOKEN");
 
     if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
-      response.setHeader("Access-Control-Allow-Origin", request.getHeader("Origin"));
+//      response.setHeader("Access-Control-Allow-Origin", request.getHeader("Origin"));
       response.setStatus(HttpServletResponse.SC_OK);
     } else {
       chain.doFilter(req, resp);
     }
   }
 
+  /**
+   * Destroy filter.
+   */
   @Override
   public void destroy() {
+    // TODO: 17/8/29
   }
 }
