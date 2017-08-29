@@ -5,6 +5,8 @@ import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -53,7 +55,11 @@ public class CorsFilter implements Filter {
         "x-requested-with, authorization, Content-Type, Authorization, credential, X-XSRF-TOKEN");
 
     if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
-//      response.setHeader("Access-Control-Allow-Origin", request.getHeader("Origin"));
+      String originHeader = request.getHeader("Origin");
+      if (originHeader != null) {
+        String rqHeader = URLEncoder.encode(originHeader, StandardCharsets.UTF_8.displayName());
+        response.setHeader("Access-Control-Allow-Origin", rqHeader);
+      }
       response.setStatus(HttpServletResponse.SC_OK);
     } else {
       chain.doFilter(req, resp);
