@@ -5,6 +5,8 @@ import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
@@ -55,11 +57,9 @@ public class CorsFilter implements Filter {
         "x-requested-with, authorization, Content-Type, Authorization, credential, X-XSRF-TOKEN");
 
     if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
-      String originHeader = request.getHeader("Origin");
-      if (originHeader != null) {
-        String rqHeader = URLEncoder.encode(originHeader, StandardCharsets.UTF_8.displayName());
-        response.setHeader("Access-Control-Allow-Origin", rqHeader);
-      }
+      String rqHeader =
+          URLDecoder.decode(request.getHeader("Origin"), StandardCharsets.UTF_8.displayName());
+      response.setHeader("Access-Control-Allow-Origin", rqHeader);
       response.setStatus(HttpServletResponse.SC_OK);
     } else {
       chain.doFilter(req, resp);
